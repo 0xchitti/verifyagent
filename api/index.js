@@ -1,11 +1,23 @@
 import express from "express";
 import { evaluate } from "./evaluate.js";
 import { getContractInfo, submitVerdictOnchain, getRequestFromChain, getStatsFromChain } from "./chain.js";
+import { initDB, getStats as getMemStats, addRequest, getRequest, updateRequest, updateStats } from "./db.js";
 
 const app = express();
 app.use(express.json());
 
+// CORS for demo
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
+
 const PORT = process.env.PORT || 3402;
+
+await initDB();
 
 // === FREE ENDPOINTS ===
 
@@ -18,6 +30,7 @@ app.get("/", (req, res) => {
     chain: "Celo",
     contract: contract.address || "pending deployment",
     oracle: contract.oracle || "pending",
+    oracleVerified: false, // Will be true after SelfProtocol verification
     endpoints: {
       free: [
         { method: "GET", path: "/", description: "Service info" },
@@ -33,38 +46,43 @@ app.get("/", (req, res) => {
         },
       ],
     },
+    synthesis: {
+      hackathon: "The Synthesis 2026",
+      tracks: ["Agents that trust", "Agents that pay", "Agents that cooperate"],
+      partners: ["Celo", "SelfProtocol"],
+    },
   });
 });
 
 app.get("/stats", async (req, res) => {
+  // Try onchain stats first, fall back to in-memory
   try {
     const stats = await getStatsFromChain();
     res.json(stats);
-  } catch (e) {
-    res.json({
-      totalVerifications: 0,
-      totalPassed: 0,
-      totalFailed: 0,
-      totalFeesCollected: "0",
-      oracleVerified: false,
-      note: "Contract not yet deployed or chain unavailable",
-    });
+  } catch {
+    res.json(getMemStats());
   }
 });
 
 app.get("/verdict/:requestId", async (req, res) => {
+  const id = parseInt(req.params.requestId);
+
+  // Try onchain first
   try {
-    const data = await getRequestFromChain(parseInt(req.params.requestId));
-    res.json(data);
-  } catch (e) {
-    res.status(404).json({ error: "Request not found or chain unavailable" });
+    const data = await getRequestFromChain(id);
+    return res.json(data);
+  } catch {
+    // Fall back to in-memory
+    const req_data = getRequest(id);
+    if (!req_data) return res.status(404).json({ error: "Request not found" });
+    return res.json(req_data);
   }
 });
 
-// === PAID ENDPOINT ===
+// === VERIFICATION ENDPOINT ===
 
 app.post("/verify", async (req, res) => {
-  const { task, delivery, taskHash, deliveryHash, requestId } = req.body || {};
+  const { task, delivery, requestId } = req.body || {};
 
   if (!task || !delivery) {
     return res.status(400).json({
@@ -72,7 +90,7 @@ app.post("/verify", async (req, res) => {
       example: {
         task: "Scrape example.com and return the page title",
         delivery: "The page title is 'Example Domain'",
-        requestId: 0, // optional: onchain request ID to auto-submit verdict
+        requestId: 0,
       },
     });
   }
@@ -80,6 +98,16 @@ app.post("/verify", async (req, res) => {
   try {
     // AI evaluation
     const result = await evaluate(task, delivery);
+
+    // Store in memory
+    const memId = addRequest({
+      task: task.slice(0, 500),
+      delivery: delivery.slice(0, 500),
+      verdict: result.verdict,
+      qualityScore: result.qualityScore,
+      reasoning: result.reasoning,
+    });
+    updateStats(result.verdict);
 
     // If requestId provided, submit verdict onchain
     let txHash = null;
@@ -92,6 +120,7 @@ app.post("/verify", async (req, res) => {
     }
 
     res.json({
+      id: memId,
       verdict: result.verdict,
       qualityScore: result.qualityScore,
       reasoning: result.reasoning,
@@ -105,6 +134,11 @@ app.post("/verify", async (req, res) => {
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`🔍 VerifyAgent v0.1.0 | port ${PORT}`);
-});
+// Start server (skip in serverless)
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🔍 VerifyAgent v0.1.0 | port ${PORT}`);
+  });
+}
+
+export default app;
