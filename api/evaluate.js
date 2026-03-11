@@ -18,19 +18,46 @@ export async function evaluate(task, delivery) {
     { name: "quality", weight: 0.2, description: "Is the work well-executed?" },
   ];
 
-  // Use Claude API for evaluation if available
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  // Try providers in order: Venice (hackathon partner) > Anthropic > heuristic
+  const veniceKey = process.env.VENICE_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
 
-  if (apiKey) {
-    return await evaluateWithLLM(task, delivery, criteria, apiKey);
+  if (veniceKey) {
+    return await evaluateWithVenice(task, delivery, criteria, veniceKey);
+  }
+  if (anthropicKey) {
+    return await evaluateWithLLM(task, delivery, criteria, anthropicKey);
   }
 
   // Fallback: heuristic evaluation
   return evaluateHeuristic(task, delivery, criteria);
 }
 
-async function evaluateWithLLM(task, delivery, criteria, apiKey) {
-  const prompt = `You are a verification oracle. Evaluate whether a delivery meets the task requirements.
+async function evaluateWithVenice(task, delivery, criteria, apiKey) {
+  const prompt = buildEvalPrompt(task, delivery, criteria);
+
+  const response = await fetch("https://api.venice.ai/api/v1/chat/completions", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: "llama-3.3-70b",
+      messages: [{ role: "user", content: prompt }],
+      max_tokens: 1024,
+      temperature: 0.1,
+    }),
+  });
+
+  if (!response.ok) throw new Error(`Venice API error: ${response.status}`);
+  const data = await response.json();
+  const text = data.choices[0].message.content.trim();
+  return parseEvalResponse(text, criteria, "venice", "llama-3.3-70b");
+}
+
+function buildEvalPrompt(task, delivery, criteria) {
+  return `You are a verification oracle. Evaluate whether a delivery meets the task requirements.
 
 TASK:
 ${task}
@@ -61,6 +88,36 @@ Rules:
 - Be honest and strict. Don't pass garbage.
 
 Return ONLY valid JSON.`;
+}
+
+function parseEvalResponse(text, criteria, provider, model) {
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  if (!jsonMatch) throw new Error("Could not parse LLM response as JSON");
+
+  const result = JSON.parse(jsonMatch[0]);
+  const weightedScore = Math.round(
+    criteria.reduce((sum, c) => sum + (result.scores[c.name] || 0) * c.weight, 0)
+  );
+
+  const verdictMap = { pass: "Pass", fail: "Fail", partial: "Partial" };
+  const verdict = verdictMap[result.verdict] || "Partial";
+
+  return {
+    verdict,
+    qualityScore: weightedScore,
+    reasoning: result.reasoning,
+    details: {
+      scores: result.scores,
+      issues: result.issues || [],
+      evaluationMethod: "ai",
+      provider,
+      model,
+    },
+  };
+}
+
+async function evaluateWithLLM(task, delivery, criteria, apiKey) {
+  const prompt = buildEvalPrompt(task, delivery, criteria);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -76,39 +133,10 @@ Return ONLY valid JSON.`;
     }),
   });
 
-  if (!response.ok) {
-    throw new Error(`Anthropic API error: ${response.status}`);
-  }
-
+  if (!response.ok) throw new Error(`Anthropic API error: ${response.status}`);
   const data = await response.json();
   const text = data.content[0].text.trim();
-
-  // Parse JSON from response
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("Could not parse LLM response as JSON");
-
-  const result = JSON.parse(jsonMatch[0]);
-
-  // Calculate weighted score
-  const weightedScore = Math.round(
-    criteria.reduce((sum, c) => sum + (result.scores[c.name] || 0) * c.weight, 0)
-  );
-
-  // Map verdict string to enum
-  const verdictMap = { pass: "Pass", fail: "Fail", partial: "Partial" };
-  const verdict = verdictMap[result.verdict] || "Partial";
-
-  return {
-    verdict,
-    qualityScore: weightedScore,
-    reasoning: result.reasoning,
-    details: {
-      scores: result.scores,
-      issues: result.issues || [],
-      evaluationMethod: "ai",
-      model: "claude-sonnet-4-20250514",
-    },
-  };
+  return parseEvalResponse(text, criteria, "anthropic", "claude-sonnet-4-20250514");
 }
 
 function evaluateHeuristic(task, delivery, criteria) {
