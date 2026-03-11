@@ -1,0 +1,6 @@
+cache/
+out/
+api/node_modules/
+.env
+*.db
+broadcast/
