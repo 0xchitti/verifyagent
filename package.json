@@ -1,0 +1,13 @@
+{
+  "name": "verifyagent",
+  "version": "1.0.0",
+  "description": "AI-powered verification oracle for agent economy",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "deploy": "forge script script/Deploy.s.sol --rpc-url base --broadcast"
+  },
+  "keywords": ["oracle", "ai", "verification", "web3", "base"],
+  "author": "0xchitti",
+  "license": "MIT"
+}
