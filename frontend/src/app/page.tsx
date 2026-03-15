@@ -1,195 +1,211 @@
-import { ArrowRight, Shield, Zap, Coins, CheckCircle, Play } from "lucide-react";
+import { Check, ArrowRight, Zap, Shield, Coins } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      {/* Header */}
-      <header className="border-b border-slate-200 bg-white/90 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-purple-600 rounded-xl flex items-center justify-center">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-slate-900">VerifyAgent</h1>
-                <p className="text-sm text-slate-500">AI Oracle • Base L2</p>
-              </div>
+    <div className="min-h-screen bg-white">
+      {/* Navigation */}
+      <nav className="flex items-center justify-between p-6 lg:px-8 border-b">
+        <div className="flex lg:flex-1">
+          <div className="flex items-center space-x-2">
+            <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+              <div className="w-4 h-4 bg-white rounded-sm"></div>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="text-slate-600 hover:text-slate-900 font-medium transition-colors">
-                Docs
+            <span className="text-xl font-semibold">VerifyAgent</span>
+          </div>
+        </div>
+        <div className="flex lg:flex-1 lg:justify-end space-x-4">
+          <button className="text-sm font-medium text-gray-600 hover:text-gray-900">
+            Docs
+          </button>
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700">
+            Connect Wallet
+          </button>
+        </div>
+      </nav>
+
+      {/* Hero */}
+      <div className="relative px-6 pt-14 lg:px-8">
+        <div className="mx-auto max-w-4xl py-32 sm:py-48 lg:py-56">
+          <div className="text-center">
+            <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-7xl">
+              AI verification oracle for the agent economy
+            </h1>
+            <p className="mt-6 text-lg leading-8 text-gray-600 max-w-2xl mx-auto">
+              Submit work, get AI verification, receive onchain proof. Pay with any token via Uniswap on Base L2.
+            </p>
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <button className="bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 rounded-lg flex items-center space-x-2">
+                <span>Start Verification</span>
+                <ArrowRight className="w-4 h-4" />
               </button>
-              <button className="bg-slate-900 text-white px-5 py-2.5 rounded-xl hover:bg-slate-800 transition-colors font-medium">
-                Connect Wallet
-              </button>
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-5 py-2.5 rounded-xl hover:shadow-lg transition-all font-medium">
-                Launch App
+              <button className="text-sm font-semibold leading-6 text-gray-900 hover:text-gray-700">
+                View Demo <span aria-hidden="true">→</span>
               </button>
             </div>
           </div>
         </div>
-      </header>
 
-      <main>
-        {/* Hero Section */}
-        <section className="max-w-7xl mx-auto px-6 py-20 text-center">
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-6xl font-bold text-slate-900 leading-tight mb-6">
-              The first verification oracle with{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                intelligence
-              </span>
-            </h1>
-            <p className="text-xl text-slate-600 mb-10 leading-relaxed max-w-3xl mx-auto">
-              Agents verify work using any token via Uniswap integration. 
-              Pay with ETH, USDC, DAI, or any ERC-20 token on Base L2.
-            </p>
-            
-            <div className="flex items-center justify-center space-x-6 mb-12">
-              <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-4 rounded-xl text-lg font-semibold hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-200 flex items-center space-x-2">
-                <span>Start Verification</span>
-                <ArrowRight className="w-5 h-5" />
-              </button>
-              <button className="border border-slate-300 text-slate-700 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-slate-50 transition-colors flex items-center space-x-2">
-                <Play className="w-5 h-5" />
-                <span>View Demo</span>
-              </button>
-            </div>
-
-            {/* Live Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-3xl mx-auto">
-              <div className="text-center">
-                <div className="text-4xl font-bold text-slate-900 mb-2">47</div>
-                <div className="text-slate-600">Verifications Completed</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-slate-900 mb-2">$12.4K</div>
-                <div className="text-slate-600">Value Verified</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl font-bold text-slate-900 mb-2">99.2%</div>
-                <div className="text-slate-600">Accuracy Rate</div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* Features */}
-        <section className="max-w-7xl mx-auto px-6 py-20">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
-                <Zap className="w-7 h-7 text-blue-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-4">AI-Powered Evaluation</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Advanced AI models assess task completion quality with detailed reasoning, 
-                scoring, and actionable feedback for continuous improvement.
-              </p>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-emerald-100 rounded-xl flex items-center justify-center mb-6">
-                <Shield className="w-7 h-7 text-emerald-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-4">Blockchain Verified</h3>
-              <p className="text-slate-600 leading-relaxed">
-                All verdicts posted immutably on Base L2 with cryptographic proof, 
-                transparent history, and dispute resolution mechanisms.
-              </p>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
-              <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center mb-6">
-                <Coins className="w-7 h-7 text-purple-600" />
-              </div>
-              <h3 className="text-xl font-bold text-slate-900 mb-4">Universal Payment</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Pay with any token via Uniswap auto-swap. Support for 1000+ tokens 
-                including ETH, USDC, DAI, and custom project tokens.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* How it Works */}
-        <section className="bg-slate-50 py-20">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-16">
-              <h2 className="text-4xl font-bold text-slate-900 mb-6">
-                How VerifyAgent Works
+        {/* Stats */}
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 pb-24">
+          <div className="mx-auto max-w-2xl lg:max-w-none">
+            <div className="text-center">
+              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+                Trusted by agents worldwide
               </h2>
-              <p className="text-xl text-slate-600 max-w-2xl mx-auto">
-                Simple 3-step process to get your work verified by AI with blockchain proof
-              </p>
             </div>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12 max-w-5xl mx-auto">
-              <div className="text-center">
-                <div className="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-6 mx-auto">
-                  01
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">Submit Task</h3>
-                <p className="text-slate-600 text-lg leading-relaxed">
-                  Upload your work, define success criteria, and choose payment token
-                </p>
+            <dl className="mt-16 grid grid-cols-1 gap-0.5 overflow-hidden rounded-2xl text-center sm:grid-cols-2 lg:grid-cols-4">
+              <div className="flex flex-col bg-gray-50 p-8">
+                <dt className="text-sm font-semibold leading-6 text-gray-600">Verifications</dt>
+                <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900">47</dd>
               </div>
-              
-              <div className="text-center">
-                <div className="w-20 h-20 bg-purple-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-6 mx-auto">
-                  02
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">AI Analysis</h3>
-                <p className="text-slate-600 text-lg leading-relaxed">
-                  Advanced AI models evaluate quality, completeness, and adherence to requirements
-                </p>
+              <div className="flex flex-col bg-gray-50 p-8">
+                <dt className="text-sm font-semibold leading-6 text-gray-600">Value Verified</dt>
+                <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900">$12.4K</dd>
               </div>
-              
-              <div className="text-center">
-                <div className="w-20 h-20 bg-emerald-600 text-white rounded-full flex items-center justify-center text-2xl font-bold mb-6 mx-auto">
-                  03
-                </div>
-                <h3 className="text-2xl font-bold text-slate-900 mb-4">Get Results</h3>
-                <p className="text-slate-600 text-lg leading-relaxed">
-                  Receive detailed feedback, score, and blockchain-verified proof of evaluation
-                </p>
+              <div className="flex flex-col bg-gray-50 p-8">
+                <dt className="text-sm font-semibold leading-6 text-gray-600">Accuracy Rate</dt>
+                <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900">99.2%</dd>
               </div>
-            </div>
+              <div className="flex flex-col bg-gray-50 p-8">
+                <dt className="text-sm font-semibold leading-6 text-gray-600">Avg Response</dt>
+                <dd className="order-first text-3xl font-semibold tracking-tight text-gray-900">12s</dd>
+              </div>
+            </dl>
           </div>
-        </section>
+        </div>
+      </div>
 
-        {/* CTA */}
-        <section className="max-w-7xl mx-auto px-6 py-20">
-          <div className="bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 rounded-3xl p-12 text-center text-white">
-            <h2 className="text-4xl font-bold mb-6">
-              Ready to verify your next project?
-            </h2>
-            <p className="text-xl opacity-90 mb-10 max-w-2xl mx-auto">
-              Join hundreds of agents and teams using VerifyAgent for quality assurance
+      {/* Features */}
+      <div className="py-24 sm:py-32 bg-gray-50">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl lg:text-center">
+            <h2 className="text-base font-semibold leading-7 text-blue-600">Verification</h2>
+            <p className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
+              Everything you need to verify agent work
             </p>
-            <button className="bg-white text-blue-600 px-8 py-4 rounded-xl text-lg font-semibold hover:bg-slate-100 transition-colors">
-              Get Started Now!
-            </button>
+            <p className="mt-6 text-lg leading-8 text-gray-600">
+              Built for the agent economy. Pay with any token, get AI-powered verification, receive onchain proof.
+            </p>
           </div>
-        </section>
-      </main>
+          <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+            <dl className="grid max-w-xl grid-cols-1 gap-x-8 gap-y-16 lg:max-w-none lg:grid-cols-3">
+              <div className="flex flex-col">
+                <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
+                  <Zap className="h-5 w-5 flex-none text-blue-600" />
+                  AI-Powered Analysis
+                </dt>
+                <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+                  <p className="flex-auto">
+                    Advanced language models evaluate work quality, provide detailed scoring, and generate comprehensive feedback reports.
+                  </p>
+                </dd>
+              </div>
+              <div className="flex flex-col">
+                <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
+                  <Shield className="h-5 w-5 flex-none text-blue-600" />
+                  Blockchain Proof
+                </dt>
+                <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+                  <p className="flex-auto">
+                    Every verification is recorded immutably on Base L2 with cryptographic signatures and transparent audit trails.
+                  </p>
+                </dd>
+              </div>
+              <div className="flex flex-col">
+                <dt className="flex items-center gap-x-3 text-base font-semibold leading-7 text-gray-900">
+                  <Coins className="h-5 w-5 flex-none text-blue-600" />
+                  Universal Payment
+                </dt>
+                <dd className="mt-4 flex flex-auto flex-col text-base leading-7 text-gray-600">
+                  <p className="flex-auto">
+                    Pay with any ERC-20 token via automatic Uniswap conversion. Support for 1000+ tokens including project tokens.
+                  </p>
+                </dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      {/* How it works */}
+      <div className="py-24 sm:py-32">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8">
+          <div className="mx-auto max-w-2xl lg:text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">How it works</h2>
+            <p className="mt-6 text-lg leading-8 text-gray-600">
+              Three simple steps to get AI verification with blockchain proof
+            </p>
+          </div>
+          <div className="mx-auto mt-16 max-w-2xl sm:mt-20 lg:mt-24 lg:max-w-none">
+            <div className="grid max-w-xl grid-cols-1 gap-8 lg:max-w-none lg:grid-cols-3">
+              <div className="text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
+                  <span className="text-lg font-bold text-white">1</span>
+                </div>
+                <h3 className="mt-6 text-lg font-semibold leading-8 tracking-tight text-gray-900">Submit Work</h3>
+                <p className="mt-2 text-base leading-7 text-gray-600">
+                  Upload your deliverable, define success criteria, and select payment token.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
+                  <span className="text-lg font-bold text-white">2</span>
+                </div>
+                <h3 className="mt-6 text-lg font-semibold leading-8 tracking-tight text-gray-900">AI Verification</h3>
+                <p className="mt-2 text-base leading-7 text-gray-600">
+                  Advanced AI models analyze quality, completeness, and requirement adherence.
+                </p>
+              </div>
+              <div className="text-center">
+                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-lg bg-blue-600">
+                  <span className="text-lg font-bold text-white">3</span>
+                </div>
+                <h3 className="mt-6 text-lg font-semibold leading-8 tracking-tight text-gray-900">Get Proof</h3>
+                <p className="mt-2 text-base leading-7 text-gray-600">
+                  Receive detailed feedback, quality score, and onchain verification certificate.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CTA */}
+      <div className="bg-blue-600">
+        <div className="px-6 py-24 sm:px-6 sm:py-32 lg:px-8">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              Ready to verify your work?
+            </h2>
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-blue-100">
+              Join the agent economy with AI-powered verification and blockchain proof.
+            </p>
+            <div className="mt-10 flex items-center justify-center gap-x-6">
+              <button className="bg-white px-6 py-3 text-sm font-semibold text-blue-600 shadow-sm hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white rounded-lg">
+                Get started
+              </button>
+              <button className="text-sm font-semibold leading-6 text-white hover:text-blue-100">
+                Learn more <span aria-hidden="true">→</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-12">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-slate-600">© 2026 VerifyAgent. Built for Synthesis Hackathon.</span>
-            </div>
-            <div className="flex items-center space-x-6 text-slate-600">
-              <span>Powered by Base L2</span>
-              <span>•</span>
-              <span>Uniswap Integration</span>
-            </div>
+      <footer className="bg-white">
+        <div className="mx-auto max-w-7xl px-6 py-12 md:flex md:items-center md:justify-between lg:px-8">
+          <div className="flex justify-center space-x-6 md:order-2">
+            <span className="text-sm leading-5 text-gray-500">Base L2</span>
+            <span className="text-sm leading-5 text-gray-500">•</span>
+            <span className="text-sm leading-5 text-gray-500">Uniswap</span>
+            <span className="text-sm leading-5 text-gray-500">•</span>
+            <span className="text-sm leading-5 text-gray-500">Synthesis Hackathon</span>
+          </div>
+          <div className="mt-8 md:order-1 md:mt-0">
+            <p className="text-center text-sm leading-5 text-gray-500">
+              &copy; 2026 VerifyAgent. Built for the agent economy.
+            </p>
           </div>
         </div>
       </footer>
