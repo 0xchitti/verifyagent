@@ -1,9 +1,10 @@
 "use client";
 
 import { CheckCircle, Shield, Zap, ArrowRight, Play } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 export default function VerifyAgentHome() {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [renderTime, setRenderTime] = useState(0);
   const [currentTime, setCurrentTime] = useState("");
@@ -32,14 +33,136 @@ export default function VerifyAgentHome() {
   useEffect(() => {
     const interval = setInterval(() => {
       setVerificationsCount(prev => prev + Math.floor(Math.random() * 3));
-      setRenderTime(Math.random() * 2.5 + 0.8);
     }, 3000);
     
     return () => clearInterval(interval);
   }, []);
 
+  // Verification Pattern Animation
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    let animationId: number;
+    let time = 0;
+    const verificationChars = "✓◯△□●◆▲▼◈◉⬢⬡⬟⬜⬛";
+    const dataChars = "01010101";
+
+    const resize = () => {
+      const dpr = window.devicePixelRatio || 1;
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      ctx.scale(dpr, dpr);
+      canvas.style.width = rect.width + 'px';
+      canvas.style.height = rect.height + 'px';
+    };
+
+    const noise = (x: number, y: number, t: number) => {
+      return Math.sin(x * 0.01 + t) * Math.cos(y * 0.008 + t * 0.7) + 
+             Math.sin(x * 0.005 - t * 0.3) * Math.cos(y * 0.012 + t * 0.2);
+    };
+
+    const render = () => {
+      const start = performance.now();
+      const rect = canvas.getBoundingClientRect();
+      
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      ctx.font = '10px monospace';
+      ctx.textAlign = 'center';
+      
+      const charSize = 12;
+      const cols = Math.ceil(rect.width / charSize);
+      const rows = Math.ceil(rect.height / charSize);
+
+      // Create verification flow pattern
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          const posX = x * charSize;
+          const posY = y * charSize;
+          
+          // Distance from mouse
+          const dx = posX - mousePos.x;
+          const dy = posY - mousePos.y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+          
+          // Verification flow waves
+          const noiseVal = noise(x, y, time);
+          const flowIntensity = 0.3 + Math.sin(x * 0.05 + time) * 0.2;
+          
+          // Only render in verification flow areas
+          if (Math.abs(noiseVal) > flowIntensity) {
+            let char: string;
+            let alpha: number;
+            
+            if (dist < 150) {
+              // Mouse proximity effect - show data streams
+              const proximity = 1 - (dist / 150);
+              char = dataChars[Math.floor((x + y + time * 10) % dataChars.length)];
+              alpha = proximity * 0.8;
+              ctx.fillStyle = `rgba(15, 23, 42, ${alpha})`;
+            } else {
+              // Background verification symbols
+              const verified = noiseVal > 0.6;
+              if (verified) {
+                char = verificationChars[Math.floor(Math.abs(noiseVal * 10) % verificationChars.length)];
+                alpha = 0.15 + (Math.abs(noiseVal) - 0.6) * 0.3;
+                ctx.fillStyle = `rgba(34, 197, 94, ${alpha})`; // Green for verified
+              } else {
+                char = '◯';
+                alpha = 0.05 + Math.abs(noiseVal) * 0.1;
+                ctx.fillStyle = `rgba(148, 163, 184, ${alpha})`; // Slate for pending
+              }
+            }
+            
+            // Add oracle pulse effect
+            const pulsePhase = Math.sin(time * 2 + (x + y) * 0.1);
+            const pulseAlpha = alpha * (1 + pulsePhase * 0.1);
+            
+            ctx.globalAlpha = pulseAlpha;
+            ctx.fillText(char, posX, posY);
+            ctx.globalAlpha = 1;
+          }
+        }
+      }
+      
+      // Oracle center beacon
+      const centerX = rect.width / 2;
+      const centerY = rect.height / 2;
+      const beaconRadius = 100 + Math.sin(time * 2) * 20;
+      
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, beaconRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(59, 130, 246, ${0.1 + Math.sin(time * 3) * 0.05})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      
+      time += 0.02;
+      setRenderTime(performance.now() - start);
+      animationId = requestAnimationFrame(render);
+    };
+
+    window.addEventListener('resize', resize);
+    resize();
+    render();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      if (animationId) cancelAnimationFrame(animationId);
+    };
+  }, [mousePos]);
+
   return (
-    <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden" style={{ cursor: 'none' }}>
+    <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden relative" style={{ cursor: 'none' }}>
+      {/* Animated Background Canvas */}
+      <canvas 
+        ref={canvasRef}
+        className="fixed inset-0 w-full h-full pointer-events-none z-0"
+      />
+
       {/* Custom Cursor */}
       <div 
         className="fixed w-1 h-1 bg-slate-900 rounded-full z-50 pointer-events-none"
@@ -61,7 +184,7 @@ export default function VerifyAgentHome() {
       />
 
       {/* Navigation */}
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 backdrop-blur-sm bg-white/90">
+      <nav className="bg-white/90 border-b border-slate-200 sticky top-0 z-40 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-8">
           <div className="flex items-center justify-between h-16">
             <div className="flex items-center space-x-4">
@@ -97,7 +220,7 @@ export default function VerifyAgentHome() {
       <div className="fixed bottom-8 right-8 text-4xl font-light z-30">Ω</div>
 
       {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-8 py-24 relative">
+      <section className="max-w-6xl mx-auto px-8 py-24 relative z-10">
         <div className="max-w-4xl">
           <h1 className="text-6xl font-light leading-tight mb-8 tracking-tight">
             Autonomous Intelligence<br />
@@ -129,8 +252,8 @@ export default function VerifyAgentHome() {
         </div>
       </section>
 
-      {/* Oracle Analysis Engine - Signature Interactive Element */}
-      <section className="bg-slate-50 py-20 border-y border-slate-200">
+      {/* Oracle Analysis Engine */}
+      <section className="bg-slate-50/90 py-20 border-y border-slate-200 relative z-10 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-8">
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-4">
@@ -147,7 +270,7 @@ export default function VerifyAgentHome() {
             </div>
             
             <div className="col-span-8">
-              <div className="bg-white border border-slate-200 p-8">
+              <div className="bg-white/90 border border-slate-200 p-8 backdrop-blur-sm">
                 <div className="space-y-1">
                   <div className="flex items-center justify-between py-3 text-sm">
                     <div className="flex items-center space-x-4">
@@ -188,7 +311,7 @@ export default function VerifyAgentHome() {
       </section>
 
       {/* System Metrics */}
-      <section className="py-20">
+      <section className="py-20 relative z-10">
         <div className="max-w-6xl mx-auto px-8">
           <div className="grid grid-cols-4 gap-12">
             <div>
@@ -224,7 +347,7 @@ export default function VerifyAgentHome() {
       </section>
 
       {/* Oracle Capabilities */}
-      <section className="bg-white py-20 border-t border-slate-200">
+      <section className="bg-white/90 py-20 border-t border-slate-200 relative z-10 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-8">
           <div className="mb-16">
             <div className="font-mono text-xs text-slate-500 uppercase tracking-wide mb-4">
@@ -271,7 +394,7 @@ export default function VerifyAgentHome() {
       </section>
 
       {/* Oracle Protocol */}
-      <section className="py-20 bg-slate-50">
+      <section className="py-20 bg-slate-50/90 relative z-10">
         <div className="max-w-6xl mx-auto px-8">
           <div className="mb-16">
             <div className="font-mono text-xs text-slate-500 uppercase tracking-wide mb-4">
@@ -318,7 +441,7 @@ export default function VerifyAgentHome() {
       </section>
 
       {/* Call to Action */}
-      <section className="bg-slate-900 py-20 text-white">
+      <section className="bg-slate-900 py-20 text-white relative z-10">
         <div className="max-w-4xl mx-auto px-8 text-center">
           <h2 className="text-4xl font-light mb-8">
             Initialize Oracle Sequence
@@ -333,7 +456,7 @@ export default function VerifyAgentHome() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-12">
+      <footer className="bg-white/90 border-t border-slate-200 py-12 relative z-10 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
