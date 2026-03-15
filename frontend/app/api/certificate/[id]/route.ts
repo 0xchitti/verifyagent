@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   // In a real app, this would fetch from database
   // For now, return a downloadable certificate format
+  const { id } = await params;
   
   const certificate = {
-    id: params.id,
+    id,
     title: "VerifyAgent Verification Certificate",
     timestamp: new Date().toISOString(),
     message: "This certificate validates that the submitted work has been analyzed by VerifyAgent AI Oracle and meets the specified verification criteria.",
