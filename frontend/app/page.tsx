@@ -270,37 +270,7 @@ export default function VerifyAgentHome() {
         </div>
       </section>
 
-      {/* Simple Stats */}
-      <section className="py-24 relative z-10">
-        <div className="max-w-5xl mx-auto px-8">
-          <div className="grid grid-cols-3 gap-16">
-            <div>
-              <div className="text-5xl font-light mb-2">{verificationsCount.toLocaleString()}</div>
-              <div className="text-slate-500 font-mono text-sm uppercase tracking-wide">Verifications</div>
-            </div>
-            <div>
-              <div className="text-5xl font-light mb-2">99.4%</div>
-              <div className="text-slate-500 font-mono text-sm uppercase tracking-wide">Accuracy</div>
-            </div>
-            <div>
-              <div className="text-5xl font-light mb-2">{renderTime.toFixed(1)}s</div>
-              <div className="text-slate-500 font-mono text-sm uppercase tracking-wide">Response</div>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Final CTA */}
-      <section className="bg-slate-900 py-24 text-white relative z-10">
-        <div className="max-w-5xl mx-auto px-8 text-center">
-          <h2 className="text-4xl font-light mb-8">
-            Start verifying agent work
-          </h2>
-          <button className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 transition-colors font-medium text-lg">
-            Launch Oracle
-          </button>
-        </div>
-      </section>
 
       {/* Minimal Footer */}
       <footer className="border-t border-slate-200 py-8 relative z-10 bg-white/90 backdrop-blur-sm">
