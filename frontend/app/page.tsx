@@ -1,29 +1,89 @@
+"use client";
+
 import { CheckCircle, Shield, Zap, ArrowRight, Play } from "lucide-react";
+import { useEffect, useState } from "react";
 
 export default function VerifyAgentHome() {
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const [renderTime, setRenderTime] = useState(0);
+  const [currentTime, setCurrentTime] = useState("");
+  const [verificationsCount, setVerificationsCount] = useState(247);
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime(now.toLocaleTimeString('en-US', { hour12: false }) + " UTC");
+    };
+    
+    const interval = setInterval(updateTime, 1000);
+    updateTime();
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setVerificationsCount(prev => prev + Math.floor(Math.random() * 3));
+      setRenderTime(Math.random() * 2.5 + 0.8);
+    }, 3000);
+    
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-white text-slate-900 overflow-x-hidden" style={{ cursor: 'none' }}>
+      {/* Custom Cursor */}
+      <div 
+        className="fixed w-1 h-1 bg-slate-900 rounded-full z-50 pointer-events-none"
+        style={{ 
+          left: mousePos.x - 2, 
+          top: mousePos.y - 2,
+          mixBlendMode: 'difference',
+          backgroundColor: 'white'
+        }}
+      />
+      <div 
+        className="fixed w-8 h-8 border border-slate-400 rounded-full z-50 pointer-events-none transition-all duration-200"
+        style={{ 
+          left: mousePos.x - 16, 
+          top: mousePos.y - 16,
+          mixBlendMode: 'difference',
+          borderColor: 'white'
+        }}
+      />
+
       {/* Navigation */}
-      <nav className="bg-slate-50 border-b border-slate-200 sticky top-0 z-50 backdrop-blur-sm bg-slate-50/90">
-        <div className="max-w-7xl mx-auto px-6">
+      <nav className="bg-white border-b border-slate-200 sticky top-0 z-40 backdrop-blur-sm bg-white/90">
+        <div className="max-w-7xl mx-auto px-8">
           <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-blue-700 rounded-lg flex items-center justify-center">
-                <Shield className="w-5 h-5 text-white" />
+            <div className="flex items-center space-x-4">
+              <div className="w-6 h-6 bg-slate-900 flex items-center justify-center text-xs font-mono text-white">
+                V
               </div>
               <div>
-                <span className="text-xl font-semibold text-slate-900">VerifyAgent</span>
-                <span className="text-xs text-slate-600 ml-2">Oracle • Base L2</span>
+                <span className="text-lg font-medium tracking-tight">VerifyAgent</span>
+                <span className="text-xs text-slate-500 ml-3 font-mono uppercase tracking-wide">Oracle System</span>
               </div>
             </div>
-            <div className="flex items-center space-x-4">
-              <button className="text-slate-600 hover:text-slate-900 font-medium text-sm transition-colors">
+            <div className="flex items-center space-x-6">
+              <span className="text-xs font-mono text-slate-500 uppercase tracking-wide">
+                {currentTime}
+              </span>
+              <button className="text-sm text-slate-600 hover:text-slate-900 transition-colors">
                 Documentation
               </button>
-              <button className="h-10 px-5 border border-slate-200 bg-white text-slate-900 rounded-lg text-sm font-medium hover:bg-slate-50 transition-colors">
+              <button className="h-9 px-4 border border-slate-300 text-slate-900 text-sm hover:bg-slate-50 transition-colors">
                 Connect Wallet
               </button>
-              <button className="h-10 px-5 bg-blue-700 text-white rounded-lg text-sm font-medium hover:bg-blue-800 transition-colors">
+              <button className="h-9 px-4 bg-slate-900 text-white text-sm hover:bg-slate-800 transition-colors">
                 Launch Oracle
               </button>
             </div>
@@ -31,179 +91,226 @@ export default function VerifyAgentHome() {
         </div>
       </nav>
 
+      {/* Corner Indices */}
+      <div className="fixed top-8 right-8 text-4xl font-light z-30">A</div>
+      <div className="fixed bottom-8 left-8 text-4xl font-light z-30">1</div>
+      <div className="fixed bottom-8 right-8 text-4xl font-light z-30">Ω</div>
+
       {/* Hero Section */}
-      <section className="max-w-6xl mx-auto px-6 py-20">
-        <div className="text-center mb-16">
-          <h1 className="text-5xl font-semibold text-slate-900 leading-tight mb-6 tracking-tight">
-            AI verification oracle with<br />
-            <span className="text-blue-700">cryptographic proof</span>
+      <section className="max-w-6xl mx-auto px-8 py-24 relative">
+        <div className="max-w-4xl">
+          <h1 className="text-6xl font-light leading-tight mb-8 tracking-tight">
+            Autonomous Intelligence<br />
+            <span className="text-slate-600">Verification Oracle</span>
           </h1>
-          <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
-            Submit agent work → Receive AI analysis → Get blockchain verification certificate. 
-            Pay with any token via Uniswap on Base L2.
+          <p className="text-lg text-slate-600 max-w-2xl leading-relaxed mb-12 font-light">
+            Submit agent deliverables → Receive cryptographic analysis → 
+            Get blockchain attestation. Universal payment via Uniswap integration on Base L2.
           </p>
           
-          <div className="flex items-center justify-center space-x-4 mt-10">
-            <button className="h-12 px-6 bg-blue-700 text-white rounded-lg font-medium hover:bg-blue-800 transition-colors flex items-center space-x-2">
-              <span>Start Verification</span>
+          <div className="flex items-center space-x-6 mb-16">
+            <button className="h-11 px-6 bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center space-x-2">
+              <span>Initialize Verification</span>
               <ArrowRight className="w-4 h-4" />
             </button>
-            <button className="h-12 px-6 border border-slate-200 bg-white text-slate-900 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center space-x-2">
+            <button className="h-11 px-6 border border-slate-300 text-slate-900 hover:bg-slate-50 transition-colors flex items-center space-x-2">
               <Play className="w-4 h-4" />
-              <span>View Demo</span>
+              <span>System Demo</span>
             </button>
           </div>
         </div>
 
-        {/* Verification Flow Preview - Signature Element */}
-        <div className="bg-white rounded-xl border border-slate-200 p-8 mb-16">
-          <div className="text-center mb-8">
-            <h3 className="text-lg font-semibold text-slate-900 mb-2">Real-time Verification Analysis</h3>
-            <p className="text-slate-600">Watch the AI oracle evaluate work quality in real-time</p>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100">
-              <div className="flex items-center space-x-3">
-                <CheckCircle className="w-5 h-5 text-green-600" />
-                <span className="font-medium text-slate-900">Completeness Check</span>
+        {/* Technical Telemetry */}
+        <div className="absolute bottom-0 left-8 font-mono text-xs text-slate-500 leading-relaxed">
+          <div>RENDER: {renderTime.toFixed(1)}ms</div>
+          <div>CURSOR: X:{mousePos.x} Y:{mousePos.y}</div>
+          <div>STATUS: ACTIVE</div>
+          <div>VERIFICATIONS: {verificationsCount.toLocaleString()}</div>
+        </div>
+      </section>
+
+      {/* Oracle Analysis Engine - Signature Interactive Element */}
+      <section className="bg-slate-50 py-20 border-y border-slate-200">
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="grid grid-cols-12 gap-8">
+            <div className="col-span-4">
+              <div className="font-mono text-xs text-slate-500 uppercase tracking-wide mb-2">
+                Analysis Engine
               </div>
-              <span className="text-sm font-medium text-green-600">✓ Verified</span>
+              <h2 className="text-2xl font-light mb-6">
+                Real-time Oracle<br />Intelligence System
+              </h2>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Watch the AI oracle evaluate deliverable quality through systematic 
+                analysis protocols with live feedback streams.
+              </p>
             </div>
             
-            <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg border border-blue-100">
-              <div className="flex items-center space-x-3">
-                <div className="w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <span className="font-medium text-slate-900">Quality Analysis</span>
+            <div className="col-span-8">
+              <div className="bg-white border border-slate-200 p-8">
+                <div className="space-y-1">
+                  <div className="flex items-center justify-between py-3 text-sm">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                      <span className="font-mono text-slate-900">COMPLETENESS_CHECK</span>
+                    </div>
+                    <span className="font-mono text-green-600">✓ 0.847</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-3 text-sm border-t border-slate-100">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      <span className="font-mono text-slate-900">QUALITY_ANALYSIS</span>
+                    </div>
+                    <span className="font-mono text-blue-600">△ {renderTime.toFixed(3)}</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-3 text-sm border-t border-slate-100 opacity-50">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-2 h-2 border border-slate-300 rounded-full"></div>
+                      <span className="font-mono text-slate-500">REQUIREMENT_ADHERENCE</span>
+                    </div>
+                    <span className="font-mono text-slate-400">◯ PENDING</span>
+                  </div>
+                  
+                  <div className="flex items-center justify-between py-3 text-sm border-t border-slate-100 opacity-30">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-2 h-2 border border-slate-300 rounded-full"></div>
+                      <span className="font-mono text-slate-500">CRYPTOGRAPHIC_SEAL</span>
+                    </div>
+                    <span className="font-mono text-slate-400">◯ QUEUED</span>
+                  </div>
+                </div>
               </div>
-              <span className="text-sm font-medium text-blue-600">Analyzing...</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100 opacity-50">
-              <div className="flex items-center space-x-3">
-                <div className="w-5 h-5 border border-slate-300 rounded-full"></div>
-                <span className="font-medium text-slate-900">Requirements Adherence</span>
-              </div>
-              <span className="text-sm font-medium text-slate-400">Pending</span>
-            </div>
-            
-            <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-slate-100 opacity-50">
-              <div className="flex items-center space-x-3">
-                <div className="w-5 h-5 border border-slate-300 rounded-full"></div>
-                <span className="font-medium text-slate-900">Blockchain Certification</span>
-              </div>
-              <span className="text-sm font-medium text-slate-400">Pending</span>
             </div>
           </div>
         </div>
+      </section>
 
-        {/* Stats */}
-        <div className="grid grid-cols-4 gap-8 mb-16">
-          <div className="text-center">
-            <div className="text-3xl font-semibold text-slate-900 mb-1">247</div>
-            <div className="text-sm text-slate-600">Verifications Complete</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-semibold text-slate-900 mb-1">$47.2K</div>
-            <div className="text-sm text-slate-600">Value Verified</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-semibold text-slate-900 mb-1">99.4%</div>
-            <div className="text-sm text-slate-600">Accuracy Rate</div>
-          </div>
-          <div className="text-center">
-            <div className="text-3xl font-semibold text-slate-900 mb-1">8.2s</div>
-            <div className="text-sm text-slate-600">Avg Response</div>
+      {/* System Metrics */}
+      <section className="py-20">
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="grid grid-cols-4 gap-12">
+            <div>
+              <div className="font-mono text-xs text-slate-500 uppercase tracking-wide mb-2">
+                Verifications
+              </div>
+              <div className="text-4xl font-light mb-1">{verificationsCount.toLocaleString()}</div>
+              <div className="text-xs text-slate-500">Complete</div>
+            </div>
+            <div>
+              <div className="font-mono text-xs text-slate-500 uppercase tracking-wide mb-2">
+                Value Secured
+              </div>
+              <div className="text-4xl font-light mb-1">$47.2K</div>
+              <div className="text-xs text-slate-500">Total Verified</div>
+            </div>
+            <div>
+              <div className="font-mono text-xs text-slate-500 uppercase tracking-wide mb-2">
+                Accuracy Rate
+              </div>
+              <div className="text-4xl font-light mb-1">99.4%</div>
+              <div className="text-xs text-slate-500">Validated</div>
+            </div>
+            <div>
+              <div className="font-mono text-xs text-slate-500 uppercase tracking-wide mb-2">
+                Response Time
+              </div>
+              <div className="text-4xl font-light mb-1">{renderTime.toFixed(1)}s</div>
+              <div className="text-xs text-slate-500">Average</div>
+            </div>
           </div>
         </div>
       </section>
 
       {/* Oracle Capabilities */}
-      <section className="bg-white py-20">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold text-slate-900 mb-4">Oracle Capabilities</h2>
-            <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-              Advanced AI analysis with cryptographic verification and universal payment support
-            </p>
+      <section className="bg-white py-20 border-t border-slate-200">
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="mb-16">
+            <div className="font-mono text-xs text-slate-500 uppercase tracking-wide mb-4">
+              Core Systems
+            </div>
+            <h2 className="text-3xl font-light">Oracle Capabilities</h2>
           </div>
           
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="border border-slate-200 rounded-xl p-6 bg-white">
-              <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-6">
-                <Zap className="w-6 h-6 text-blue-700" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+            <div>
+              <div className="w-8 h-8 bg-slate-100 flex items-center justify-center mb-6">
+                <Zap className="w-4 h-4 text-slate-700" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">AI-Powered Analysis</h3>
-              <p className="text-slate-600 leading-relaxed">
-                Advanced language models evaluate work quality with detailed reasoning, 
-                scoring rubrics, and actionable feedback for continuous improvement.
+              <h3 className="text-lg font-medium mb-4">AI Analysis Engine</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Advanced language models evaluate deliverable quality through systematic 
+                protocols, generating detailed scoring matrices and improvement recommendations.
               </p>
             </div>
             
-            <div className="border border-slate-200 rounded-xl p-6 bg-white">
-              <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-6">
-                <Shield className="w-6 h-6 text-green-700" />
+            <div>
+              <div className="w-8 h-8 bg-slate-100 flex items-center justify-center mb-6">
+                <Shield className="w-4 h-4 text-slate-700" />
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">Blockchain Verification</h3>
-              <p className="text-slate-600 leading-relaxed">
+              <h3 className="text-lg font-medium mb-4">Cryptographic Attestation</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
                 Every oracle decision recorded immutably on Base L2 with cryptographic 
-                signatures, timestamps, and transparent audit trails.
+                signatures, timestamps, and tamper-evident audit trails.
               </p>
             </div>
             
-            <div className="border border-slate-200 rounded-xl p-6 bg-white">
-              <div className="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center mb-6">
-                <div className="w-6 h-6 text-amber-700">⚡</div>
+            <div>
+              <div className="w-8 h-8 bg-slate-100 flex items-center justify-center mb-6">
+                <div className="w-4 h-4 text-slate-700 font-mono text-xs">Ξ</div>
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">Universal Payment</h3>
-              <p className="text-slate-600 leading-relaxed">
+              <h3 className="text-lg font-medium mb-4">Universal Settlement</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
                 Pay verification fees with any ERC-20 token via automatic Uniswap 
-                conversion. Support for 1000+ tokens including project-specific ones.
+                conversion protocols. Support for 1000+ token standards.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Verification Process */}
+      {/* Oracle Protocol */}
       <section className="py-20 bg-slate-50">
-        <div className="max-w-6xl mx-auto px-6">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-semibold text-slate-900 mb-4">Oracle Process</h2>
-            <p className="text-lg text-slate-600">Three-step verification with cryptographic proof</p>
+        <div className="max-w-6xl mx-auto px-8">
+          <div className="mb-16">
+            <div className="font-mono text-xs text-slate-500 uppercase tracking-wide mb-4">
+              Execution Protocol
+            </div>
+            <h2 className="text-3xl font-light">Three-Phase Oracle Process</h2>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-700 text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-semibold">
-                1
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            <div>
+              <div className="w-12 h-12 bg-slate-900 text-white flex items-center justify-center text-lg font-mono mb-6">
+                01
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">Submit Work</h3>
-              <p className="text-slate-600">
-                Upload deliverables, define success criteria, select payment token, 
-                and set verification parameters.
+              <h3 className="text-lg font-medium mb-4">Submission Protocol</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Upload deliverables via secure channels, define verification parameters, 
+                select payment token, and initialize oracle analysis sequence.
               </p>
             </div>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-700 text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-semibold">
-                2
+            <div>
+              <div className="w-12 h-12 bg-slate-900 text-white flex items-center justify-center text-lg font-mono mb-6">
+                02
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">AI Oracle Analysis</h3>
-              <p className="text-slate-600">
-                Advanced AI models evaluate completeness, quality, and requirement 
-                adherence with detailed scoring.
+              <h3 className="text-lg font-medium mb-4">Analysis Execution</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                AI oracle systems evaluate completeness, quality metrics, and requirement 
+                adherence through multi-model consensus protocols.
               </p>
             </div>
             
-            <div className="text-center">
-              <div className="w-16 h-16 bg-blue-700 text-white rounded-full flex items-center justify-center mx-auto mb-6 text-xl font-semibold">
-                3
+            <div>
+              <div className="w-12 h-12 bg-slate-900 text-white flex items-center justify-center text-lg font-mono mb-6">
+                03
               </div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-3">Receive Certificate</h3>
-              <p className="text-slate-600">
-                Get detailed feedback, quality scores, and tamper-proof blockchain 
-                verification certificate.
+              <h3 className="text-lg font-medium mb-4">Attestation Output</h3>
+              <p className="text-slate-600 text-sm leading-relaxed">
+                Receive comprehensive analysis reports, quality scores, and 
+                blockchain-verified attestation certificates with audit trails.
               </p>
             </div>
           </div>
@@ -211,36 +318,34 @@ export default function VerifyAgentHome() {
       </section>
 
       {/* Call to Action */}
-      <section className="bg-blue-700 py-20">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-semibold text-white mb-6">
-            Ready for AI verification?
+      <section className="bg-slate-900 py-20 text-white">
+        <div className="max-w-4xl mx-auto px-8 text-center">
+          <h2 className="text-4xl font-light mb-8">
+            Initialize Oracle Sequence
           </h2>
-          <p className="text-xl text-blue-100 mb-8 max-w-2xl mx-auto">
-            Join the agent economy with cryptographically verified quality assurance
+          <p className="text-lg text-slate-300 mb-12 max-w-2xl mx-auto font-light">
+            Enter the agent economy with cryptographically verified intelligence protocols
           </p>
-          <button className="h-12 px-8 bg-white text-blue-700 rounded-lg font-semibold hover:bg-blue-50 transition-colors">
-            Launch Oracle Now
+          <button className="h-12 px-8 bg-white text-slate-900 hover:bg-slate-100 transition-colors font-medium">
+            Launch Oracle System
           </button>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-8">
-        <div className="max-w-6xl mx-auto px-6">
+      <footer className="bg-white border-t border-slate-200 py-12">
+        <div className="max-w-6xl mx-auto px-8">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-6 h-6 bg-blue-700 rounded-md flex items-center justify-center">
-                <Shield className="w-4 h-4 text-white" />
+            <div className="flex items-center space-x-4">
+              <div className="w-4 h-4 bg-slate-900 flex items-center justify-center text-xs font-mono text-white">
+                V
               </div>
-              <span className="text-slate-600">© 2026 VerifyAgent • Synthesis Hackathon</span>
+              <span className="text-slate-600 font-mono text-xs">© 2026 VerifyAgent • Synthesis Hackathon</span>
             </div>
-            <div className="flex items-center space-x-6 text-sm text-slate-500">
+            <div className="flex items-center space-x-8 text-xs font-mono text-slate-500">
               <span>Base L2</span>
-              <span>•</span>
-              <span>Uniswap Integration</span>
-              <span>•</span>
-              <span>AI Oracle Technology</span>
+              <span>Uniswap Protocol</span>
+              <span>Oracle Technology</span>
             </div>
           </div>
         </div>
