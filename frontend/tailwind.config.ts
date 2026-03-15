@@ -44,6 +44,10 @@ const config: Config = {
           foreground: "hsl(var(--card-foreground))",
         },
       },
+      borderColor: {
+        DEFAULT: "hsl(var(--border))",
+        border: "hsl(var(--border))",
+      },
       fontFamily: {
         sans: ["Inter Variable", "Inter", "system-ui", "sans-serif"],
       },
