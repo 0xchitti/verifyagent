@@ -179,17 +179,15 @@ export default function VerifyAgentHome() {
               <span className="text-xs font-mono text-slate-500 uppercase tracking-wide">
                 {currentTime}
               </span>
-              <button className="h-9 px-4 bg-slate-900 text-white text-sm hover:bg-slate-800 transition-colors">
+              <a href="/verify" className="h-9 px-4 bg-slate-900 text-white text-sm hover:bg-slate-800 transition-colors">
                 Launch
-              </button>
+              </a>
             </div>
           </div>
         </div>
       </nav>
 
-      {/* Corner Indices */}
-      <div className="fixed top-8 right-8 text-4xl font-light z-30">A</div>
-      <div className="fixed bottom-8 right-8 text-4xl font-light z-30">Ω</div>
+
 
       {/* Hero Section */}
       <section className="max-w-5xl mx-auto px-8 py-32 relative z-10">
@@ -202,18 +200,13 @@ export default function VerifyAgentHome() {
             Pay with any token on Base L2.
           </p>
           
-          <button className="h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center space-x-2 text-lg">
+          <a href="/verify" className="h-12 px-8 bg-slate-900 text-white hover:bg-slate-800 transition-colors flex items-center space-x-2 text-lg">
             <span>Start Verification</span>
             <ArrowRight className="w-5 h-5" />
-          </button>
+          </a>
         </div>
 
-        {/* Technical Telemetry */}
-        <div className="absolute bottom-0 left-8 font-mono text-xs text-slate-500 leading-relaxed">
-          <div>RENDER: {renderTime.toFixed(1)}ms</div>
-          <div>VERIFICATIONS: {verificationsCount.toLocaleString()}</div>
-          <div>STATUS: ACTIVE</div>
-        </div>
+
       </section>
 
       {/* Live Verification Demo */}
