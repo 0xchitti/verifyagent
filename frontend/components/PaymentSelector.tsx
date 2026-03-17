@@ -93,7 +93,7 @@ export default function PaymentSelector({
             <button
               key={token.address}
               onClick={() => onTokenSelect(token)}
-              disabled={!hasEnough && userAddress}
+              disabled={!hasEnough && !!userAddress}
               className={`
                 relative p-3 rounded-lg border transition-all
                 ${isSelected 
