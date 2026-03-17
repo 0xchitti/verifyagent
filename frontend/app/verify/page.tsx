@@ -1,218 +1,336 @@
 "use client";
 
-import { useState } from 'react';
-import { ArrowRight, Upload, Download } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowRight, Wallet, ExternalLink, CheckCircle, Clock } from 'lucide-react';
+import { web3Service, SUPPORTED_TOKENS, PaymentToken, TOKENS } from '../../lib/web3';
+import PaymentSelector from '../../components/PaymentSelector';
+
+// Mock contract address - replace with actual deployed contract
+const CONTRACT_ADDRESS = '0x1234567890123456789012345678901234567890';
+
+interface VerificationResult {
+  requestId: string;
+  txHash: string;
+  score?: number;
+  reasoning?: string;
+  completed: boolean;
+}
 
 export default function VerifyPage() {
-  const [file, setFile] = useState<File | null>(null);
-  const [criteria, setCriteria] = useState('');
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState<any>(null);
+  const [task, setTask] = useState('');
+  const [delivery, setDelivery] = useState('');
+  const [isConnected, setIsConnected] = useState(false);
+  const [userAddress, setUserAddress] = useState<string>('');
+  const [selectedToken, setSelectedToken] = useState<PaymentToken>(SUPPORTED_TOKENS[0]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [result, setResult] = useState<VerificationResult | null>(null);
+  const [error, setError] = useState<string>('');
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!file || !criteria) return;
+  useEffect(() => {
+    checkConnection();
+  }, []);
 
-    setIsAnalyzing(true);
-    setResult(null);
-
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('criteria', criteria);
-
+  const checkConnection = async () => {
     try {
-      const response = await fetch('/api/verify', {
-        method: 'POST',
-        body: formData
-      });
-
-      const data = await response.json();
-      setResult(data);
+      if (typeof window !== 'undefined' && window.ethereum) {
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) {
+          const { address } = await web3Service.connect();
+          setUserAddress(address);
+          setIsConnected(true);
+        }
+      }
     } catch (error) {
-      console.error('Verification failed:', error);
-      setResult({ error: 'Verification failed. Please try again.' });
-    } finally {
-      setIsAnalyzing(false);
+      console.error('Connection check failed:', error);
     }
   };
 
-  const downloadCertificate = (certificateId: string) => {
-    window.location.href = `/api/certificate/${certificateId}`;
+  const connectWallet = async () => {
+    try {
+      const { address } = await web3Service.connect();
+      setUserAddress(address);
+      setIsConnected(true);
+      setError('');
+    } catch (error: any) {
+      setError(error.message || 'Failed to connect wallet');
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!task.trim() || !delivery.trim()) {
+      setError('Please fill in both task and delivery fields');
+      return;
+    }
+    
+    if (!isConnected) {
+      setError('Please connect your wallet first');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError('');
+    setResult(null);
+
+    try {
+      // Request verification through smart contract
+      const { requestId, txHash } = await web3Service.requestVerification(
+        CONTRACT_ADDRESS,
+        task,
+        delivery,
+        selectedToken.address
+      );
+
+      setResult({
+        requestId,
+        txHash,
+        completed: false
+      });
+
+      // Start polling for completion
+      pollVerificationStatus(requestId);
+    } catch (error: any) {
+      console.error('Verification failed:', error);
+      setError(error.message || 'Verification failed. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const pollVerificationStatus = async (requestId: string) => {
+    const poll = async () => {
+      try {
+        const verification = await web3Service.getVerification(CONTRACT_ADDRESS, requestId);
+        if (verification.completed) {
+          setResult(prev => prev ? {
+            ...prev,
+            score: verification.score,
+            reasoning: verification.reasoning,
+            completed: true
+          } : null);
+        } else {
+          // Continue polling
+          setTimeout(poll, 3000);
+        }
+      } catch (error) {
+        console.error('Polling failed:', error);
+        setTimeout(poll, 5000); // Retry in 5s
+      }
+    };
+    
+    // Start polling after 5 seconds
+    setTimeout(poll, 5000);
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score >= 90) return 'text-green-400';
+    if (score >= 70) return 'text-yellow-400';
+    if (score >= 50) return 'text-orange-400';
+    return 'text-red-400';
+  };
+
+  const getScoreLabel = (score: number) => {
+    if (score >= 90) return 'Excellent';
+    if (score >= 70) return 'Good';
+    if (score >= 50) return 'Fair';
+    return 'Poor';
   };
 
   return (
-    <div className="min-h-screen bg-white text-slate-900" style={{ cursor: 'default' }}>
+    <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
-      <nav className="bg-white border-b border-slate-200 sticky top-0 z-40">
+      <nav className="border-b border-gray-800 sticky top-0 z-40 bg-black/50 backdrop-blur-sm">
         <div className="max-w-6xl mx-auto px-8">
           <div className="flex items-center justify-between h-16">
+            <a href="/" className="flex items-center space-x-4">
+              <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-lg flex items-center justify-center">
+                <span className="text-black font-bold text-sm">V</span>
+              </div>
+              <span className="font-semibold">VerifyAgent</span>
+            </a>
+            
             <div className="flex items-center space-x-4">
-              <a href="/" className="flex items-center space-x-4">
-                <div className="w-6 h-6 bg-slate-900 flex items-center justify-center text-xs font-mono text-white">
-                  V
+              {isConnected ? (
+                <div className="flex items-center space-x-2 px-3 py-1 bg-green-400/10 border border-green-400/20 rounded-lg">
+                  <div className="w-2 h-2 bg-green-400 rounded-full"></div>
+                  <span className="text-sm text-green-400">
+                    {userAddress.slice(0, 6)}...{userAddress.slice(-4)}
+                  </span>
                 </div>
-                <span className="text-lg font-medium tracking-tight">VerifyAgent</span>
-              </a>
-            </div>
-            <div className="text-xs font-mono text-slate-500 uppercase tracking-wide">
-              Verification Interface
+              ) : (
+                <button
+                  onClick={connectWallet}
+                  className="flex items-center space-x-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded-lg transition-colors"
+                >
+                  <Wallet size={16} />
+                  <span>Connect Wallet</span>
+                </button>
+              )}
             </div>
           </div>
         </div>
       </nav>
 
-      <div className="max-w-4xl mx-auto px-8 py-16">
+      <div className="max-w-4xl mx-auto px-8 py-12">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-light mb-4">AI Work Verification</h1>
-          <p className="text-lg text-slate-600">Submit your work for AI analysis and cryptographic verification</p>
+          <h1 className="text-4xl font-bold mb-4">AI Verification Oracle</h1>
+          <p className="text-xl text-gray-400">
+            Submit your task and delivery for AI-powered quality evaluation
+          </p>
         </div>
 
-        {!result && (
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {/* File Upload */}
-            <div>
-              <label className="block text-sm font-medium text-slate-900 mb-4">
-                Upload Work Deliverable
-              </label>
-              <div className="border-2 border-dashed border-slate-300 rounded-lg p-8 text-center hover:border-slate-400 transition-colors">
-                <input
-                  type="file"
-                  onChange={(e) => setFile(e.target.files?.[0] || null)}
-                  className="hidden"
-                  id="file-upload"
-                  accept=".txt,.md,.js,.py,.html,.css,.json"
-                />
-                <label htmlFor="file-upload" className="cursor-pointer">
-                  <Upload className="w-12 h-12 text-slate-400 mx-auto mb-4" />
-                  {file ? (
-                    <div>
-                      <p className="font-medium text-slate-900">{file.name}</p>
-                      <p className="text-sm text-slate-500">{(file.size / 1024).toFixed(1)} KB</p>
-                    </div>
-                  ) : (
-                    <div>
-                      <p className="text-slate-600">Click to upload file</p>
-                      <p className="text-sm text-slate-500">Supports: TXT, MD, JS, PY, HTML, CSS, JSON</p>
-                    </div>
-                  )}
+        {/* Verification Form */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Task Description
                 </label>
+                <textarea
+                  value={task}
+                  onChange={(e) => setTask(e.target.value)}
+                  placeholder="Describe the task that was assigned..."
+                  rows={4}
+                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-400"
+                />
               </div>
-            </div>
 
-            {/* Criteria */}
-            <div>
-              <label className="block text-sm font-medium text-slate-900 mb-4">
-                Verification Criteria
-              </label>
-              <textarea
-                value={criteria}
-                onChange={(e) => setCriteria(e.target.value)}
-                placeholder="Describe what makes this work successful. What should the AI look for when verifying quality and completeness?"
-                className="w-full h-32 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
-                required
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-2">
+                  Delivery/Output
+                </label>
+                <textarea
+                  value={delivery}
+                  onChange={(e) => setDelivery(e.target.value)}
+                  placeholder="Paste the completed work, output, or deliverable..."
+                  rows={6}
+                  className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-white placeholder-gray-400"
+                />
+              </div>
+
+              {error && (
+                <div className="p-4 bg-red-900/20 border border-red-800 rounded-lg text-red-400">
+                  {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isSubmitting || !isConnected || !task.trim() || !delivery.trim()}
+                className="w-full flex items-center justify-center space-x-2 px-6 py-3 bg-gradient-to-r from-blue-500 to-green-400 hover:from-blue-600 hover:to-green-500 disabled:from-gray-600 disabled:to-gray-700 disabled:cursor-not-allowed rounded-lg transition-all duration-200 font-medium"
+              >
+                {isSubmitting ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    <span>Submitting...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Request Verification</span>
+                    <ArrowRight size={16} />
+                  </>
+                )}
+              </button>
+            </form>
+          </div>
+
+          {/* Payment Sidebar */}
+          <div className="space-y-6">
+            <div className="bg-gray-900 rounded-lg p-6">
+              <PaymentSelector
+                selectedToken={selectedToken}
+                onTokenSelect={setSelectedToken}
+                userAddress={isConnected ? userAddress : undefined}
+                contractAddress={CONTRACT_ADDRESS}
               />
             </div>
 
-            <button
-              type="submit"
-              disabled={!file || !criteria || isAnalyzing}
-              className="w-full h-12 bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors disabled:bg-slate-300 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-            >
-              {isAnalyzing ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  <span>Analyzing...</span>
-                </>
-              ) : (
-                <>
-                  <span>Start Verification</span>
-                  <ArrowRight className="w-4 h-4" />
-                </>
-              )}
-            </button>
-          </form>
-        )}
-
-        {/* Results */}
-        {result && !result.error && (
-          <div className="space-y-8">
-            <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-              <h2 className="text-xl font-semibold text-green-900 mb-4">✓ Verification Complete</h2>
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <p className="text-sm text-green-700 mb-1">Overall Score</p>
-                  <p className="text-2xl font-bold text-green-900">{(result.certificate.score * 100).toFixed(1)}%</p>
+            {/* Verification Info */}
+            <div className="bg-gray-900 rounded-lg p-6 space-y-4">
+              <h3 className="font-medium text-white">How it works</h3>
+              <div className="space-y-3 text-sm text-gray-400">
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">1</div>
+                  <div>Submit task description and delivery</div>
                 </div>
-                <div>
-                  <p className="text-sm text-green-700 mb-1">Status</p>
-                  <p className="text-lg font-semibold text-green-900">
-                    {result.certificate.verified ? 'VERIFIED' : 'NEEDS IMPROVEMENT'}
-                  </p>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">2</div>
+                  <div>Pay with ETH, USDC, or DAI</div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">3</div>
+                  <div>AI evaluates quality and posts on-chain verdict</div>
+                </div>
+                <div className="flex items-start space-x-3">
+                  <div className="w-6 h-6 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs font-bold mt-0.5">4</div>
+                  <div>Get score (0-100) with detailed reasoning</div>
                 </div>
               </div>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-lg p-6">
-              <h3 className="font-semibold text-slate-900 mb-4">Analysis Results</h3>
-              <div className="space-y-3">
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Completeness</span>
-                  <span className="font-medium">{result.certificate.analysis.completeness}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Technical Quality</span>
-                  <span className="font-medium">{result.certificate.analysis.technical_quality}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Documentation</span>
-                  <span className="font-medium">{result.certificate.analysis.documentation}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-600">Criteria Adherence</span>
-                  <span className="font-medium">{result.certificate.analysis.criteria_adherence}</span>
-                </div>
-              </div>
-
-              {result.certificate.analysis.feedback && (
-                <div className="mt-6">
-                  <h4 className="font-medium text-slate-900 mb-2">Feedback</h4>
-                  <ul className="space-y-1">
-                    {result.certificate.analysis.feedback.map((item: string, index: number) => (
-                      <li key={index} className="text-sm text-slate-600">• {item}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
-
-            <div className="flex space-x-4">
-              <button
-                onClick={() => downloadCertificate(result.certificate.id)}
-                className="flex-1 h-12 bg-slate-900 text-white font-medium hover:bg-slate-800 transition-colors flex items-center justify-center space-x-2"
-              >
-                <Download className="w-4 h-4" />
-                <span>Download Certificate</span>
-              </button>
-              <button
-                onClick={() => { setResult(null); setFile(null); setCriteria(''); }}
-                className="h-12 px-6 border border-slate-300 text-slate-900 font-medium hover:bg-slate-50 transition-colors"
-              >
-                Verify Another
-              </button>
             </div>
           </div>
-        )}
+        </div>
 
-        {result?.error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <h2 className="text-xl font-semibold text-red-900 mb-2">Verification Failed</h2>
-            <p className="text-red-700">{result.error}</p>
-            <button
-              onClick={() => setResult(null)}
-              className="mt-4 h-10 px-4 bg-red-600 text-white font-medium hover:bg-red-700 transition-colors"
-            >
-              Try Again
-            </button>
+        {/* Results */}
+        {result && (
+          <div className="mt-12">
+            <div className="bg-gray-900 rounded-lg p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-xl font-semibold">Verification Result</h3>
+                <div className="flex items-center space-x-2">
+                  {result.completed ? (
+                    <CheckCircle size={20} className="text-green-400" />
+                  ) : (
+                    <Clock size={20} className="text-yellow-400 animate-pulse" />
+                  )}
+                  <span className={`text-sm ${result.completed ? 'text-green-400' : 'text-yellow-400'}`}>
+                    {result.completed ? 'Completed' : 'Processing...'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <div className="text-sm text-gray-400 mb-1">Request ID</div>
+                  <div className="font-mono text-sm bg-gray-800 p-2 rounded break-all">
+                    {result.requestId}
+                  </div>
+                </div>
+                
+                <div>
+                  <div className="text-sm text-gray-400 mb-1">Transaction</div>
+                  <a 
+                    href={`https://basescan.org/tx/${result.txHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center space-x-1 text-blue-400 hover:text-blue-300"
+                  >
+                    <span className="font-mono text-sm">{result.txHash.slice(0, 10)}...</span>
+                    <ExternalLink size={14} />
+                  </a>
+                </div>
+              </div>
+
+              {result.completed && result.score !== undefined && (
+                <div className="mt-6 pt-6 border-t border-gray-700">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="text-sm text-gray-400">Quality Score</div>
+                    <div className={`text-2xl font-bold ${getScoreColor(result.score)}`}>
+                      {result.score}/100 ({getScoreLabel(result.score)})
+                    </div>
+                  </div>
+                  
+                  {result.reasoning && (
+                    <div>
+                      <div className="text-sm text-gray-400 mb-2">AI Reasoning</div>
+                      <div className="bg-gray-800 p-4 rounded-lg text-gray-300">
+                        {result.reasoning}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
