@@ -179,14 +179,9 @@ export default function VerifyAgentHome() {
               <span className="text-xs font-mono text-slate-500 uppercase tracking-wide">
                 {currentTime}
               </span>
-              <div className="flex items-center space-x-2">
-                <a href="/verify" className="h-9 px-4 bg-slate-900 text-white text-sm hover:bg-slate-800 transition-colors">
-                  Base
-                </a>
-                <a href="/celo" className="h-9 px-4 bg-green-600 text-white text-sm hover:bg-green-700 transition-colors">
-                  Celo
-                </a>
-              </div>
+              <a href="/verify" className="h-9 px-4 bg-slate-900 text-white text-sm hover:bg-slate-800 transition-colors">
+                Launch
+              </a>
             </div>
           </div>
         </div>
