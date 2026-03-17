@@ -102,14 +102,18 @@ VerifyAgent is an AI-powered verification oracle specifically built for the agen
 ## 🚀 Live Demos
 
 ### Base Network (Uniswap Integration)
-- **URL:** [TBD - Deploy to Vercel]
+- **URL:** [https://frontend-swart-nu-10.vercel.app/verify](https://frontend-swart-nu-10.vercel.app/verify)
 - **Features:** Multi-token payments, Uniswap swapping
 - **Contract:** [TBD - Deploy to Base]
 
 ### Celo Network (SelfProtocol Integration)  
-- **URL:** [TBD - Deploy to Vercel]
+- **URL:** [https://frontend-swart-nu-10.vercel.app/celo](https://frontend-swart-nu-10.vercel.app/celo)
 - **Features:** Reputation system, identity verification
 - **Contract:** [TBD - Deploy to Celo]
+
+### Main Landing Page
+- **URL:** [https://frontend-swart-nu-10.vercel.app](https://frontend-swart-nu-10.vercel.app)
+- **Features:** Dual-network overview, animated demo
 
 ## 🛠️ Getting Started
 

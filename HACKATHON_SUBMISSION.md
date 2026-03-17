@@ -16,7 +16,7 @@
 - ✅ Gas-optimized smart contract with OpenZeppelin security
 - ✅ Production-ready deployment scripts
 
-**Demo URL:** [Base Network Interface]
+**Demo URL:** [https://frontend-swart-nu-10.vercel.app/verify](https://frontend-swart-nu-10.vercel.app/verify)
 **Contract:** VerificationOracle.sol (Base-ready)
 
 ### 🌟 Celo + SelfProtocol Integration - $10,000 Bounty ✅
@@ -29,7 +29,7 @@
 - ✅ Batch verification for efficiency (up to 10x)
 - ✅ Complete Celo UI with CELO/cUSD/cEUR support
 
-**Demo URL:** [Celo Network Interface]  
+**Demo URL:** [https://frontend-swart-nu-10.vercel.app/celo](https://frontend-swart-nu-10.vercel.app/celo)
 **Contract:** VerificationOracleCelo.sol (Celo-ready)
 
 ## 💡 Core Innovation: AI Verification Oracle
